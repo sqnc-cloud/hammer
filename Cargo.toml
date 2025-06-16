@@ -6,3 +6,6 @@ author = "iagxferreira github.com/iagxferreira"
 
 [dependencies]
 clap = { version= "4.5.40", features = ["derive"]} 
+walkdir = "2.5.0"
+zip = "4.1.0"
+anyhow = "1.0.98"

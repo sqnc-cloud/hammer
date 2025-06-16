@@ -1,6 +1,8 @@
 [package]
-name = "mongodb-s3-backup"
+name = "hammer"
 version = "0.1.0"
 edition = "2024"
+author = "iagxferreira github.com/iagxferreira"
 
 [dependencies]
+clap = { version= "4.5.40", features = ["derive"]} 

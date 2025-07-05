@@ -2,9 +2,8 @@ package backup
 
 import (
 	"fmt"
-	"hammer/internal"
-
 	"github.com/spf13/cobra"
+	"hammer/internal"
 )
 
 var (

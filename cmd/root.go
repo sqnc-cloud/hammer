@@ -1,10 +1,9 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
 	"hammer/cmd/backup"
 	"os"
-
-	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
@@ -25,6 +24,5 @@ func addSubcommandPalettes() {
 }
 
 func init() {
-
 	addSubcommandPalettes()
 }

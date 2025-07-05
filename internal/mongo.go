@@ -11,14 +11,14 @@ import (
 )
 
 func ExportCollections(uri string, database string) {
-	collections := CollectDatabaseCollections(database, uri)
+	collections := collectDatabaseCollections(database, uri)
 	fmt.Println("Found:", collections)
 	for _, collection := range collections {
-		ExportCollection(collection, uri)
+		exportCollection(collection, uri)
 	}
 }
 
-func ExportCollection(collection string, uri string) {
+func exportCollection(collection string, uri string) {
 	fmt.Println("Exporting collection ", collection)
 	cmd := exec.Command(
 		"mongoexport",
@@ -37,7 +37,7 @@ func ExportCollection(collection string, uri string) {
 	}
 }
 
-func CollectDatabaseCollections(database string, uri string) []string {
+func collectDatabaseCollections(database string, uri string) []string {
 	fmt.Println("Listing collections")
 	client := connectDatabase(uri)
 	db := client.Database(database)

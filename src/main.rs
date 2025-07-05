@@ -2,9 +2,8 @@ use clap::Parser;
 use std::env;
 use std::fs::File;
 use std::io::{Read, Seek, Write};
-use std::path::{Path};
+use std::path::Path;
 use std::process::Command;
-use anyhow::Context;
 use walkdir::{DirEntry, WalkDir};
 use zip::write::SimpleFileOptions;
 
@@ -66,11 +65,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let walkdir = WalkDir::new(output_dir.clone());
     let it = walkdir.into_iter();
 
-    zip_dir(&mut it.filter_map(|e| e.ok()), output_dir.clone().as_ref(), file, zip::CompressionMethod::Stored)?;
-    return Ok(())
+    zip_dir(
+        &mut it.filter_map(|e| e.ok()),
+        output_dir.clone().as_ref(),
+        file,
+        zip::CompressionMethod::Stored,
+    )?;
+    return Ok(());
 }
-
-
 fn zip_dir<T>(
     it: &mut dyn Iterator<Item = DirEntry>,
     prefix: &Path,
@@ -85,28 +87,26 @@ where
         .compression_method(method)
         .unix_permissions(0o755);
 
-    let prefix = Path::new(prefix);
     let mut buffer = Vec::new();
     for entry in it {
         let path = entry.path();
         let name = path.strip_prefix(prefix)?;
-        let path_as_string = name
+        let path_str = name
             .to_str()
-            .map(str::to_owned)
-            .with_context(|| format!("{name:?} Is a Non UTF-8 Path"))?;
+            .ok_or_else(|| anyhow::anyhow!("{:?} is not a valid UTF-8 path", name))?;
+
         if path.is_file() {
             println!("adding file {path:?} as {name:?} ...");
-            zip.start_file(path_as_string, options)?;
-            let mut f = File::open(path)?;
-
-            f.read_to_end(&mut buffer)?;
+            zip.start_file(path_str, options)?;
+            File::open(path)?.read_to_end(&mut buffer)?;
             zip.write_all(&buffer)?;
             buffer.clear();
         } else if !name.as_os_str().is_empty() {
-            println!("adding dir {path_as_string:?} as {name:?} ...");
-            zip.add_directory(path_as_string, options)?;
+            println!("adding dir {path_str:?} as {name:?} ...");
+            zip.add_directory(path_str, options)?;
         }
     }
     zip.finish()?;
     Ok(())
 }
+

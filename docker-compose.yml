@@ -1,0 +1,24 @@
+
+version: "3.8"
+
+services:
+  hammer-test-db:
+    image: mongo:latest
+    container_name: hammer-db
+    ports:
+      - "27017:27017"
+    networks:
+      - hammer-network
+    volumes:
+      - mongodb_data:/data/db
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+networks:
+  hammer-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:

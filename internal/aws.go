@@ -2,8 +2,10 @@ package internal
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"os"
+	"time"
+
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -79,9 +81,11 @@ func UploadToS3(filePath, bucket, awsKey, awsSecret, region string) error {
 		return fmt.Errorf("failed to open file %q, %v", filePath, err)
 	}
 
+	s3FileName := time.Now().Format(time.RFC3339) + ".zip"
+
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(filePath),
+		Key:    aws.String(s3FileName),
 		Body:   f,
 	})
 	if err != nil {

@@ -2,13 +2,15 @@ package backup
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"hammer/internal"
+
+	"github.com/spf13/cobra"
 )
 
 var (
 	connectionString string
-	upload             bool
+	databaseName     string
+	upload           bool
 )
 
 var BackupCmd = &cobra.Command{
@@ -16,10 +18,7 @@ var BackupCmd = &cobra.Command{
 	Short: "Extract your backup to a zipfile or uploads to aws",
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		uri := "mongodb://localhost:27017"
-		database := "hammer"
-		backupFile, err := internal.ExportCollections(uri, database)
-
+		backupFile, err := internal.ExportCollections(connectionString, databaseName)
 		if err != nil {
 			return fmt.Errorf("error to create a backup %v", err)
 		}
@@ -37,10 +36,14 @@ var BackupCmd = &cobra.Command{
 }
 
 func init() {
-	BackupCmd.Flags().StringVarP(&connectionString, "db", "d", "", "Database connection string")
+	BackupCmd.Flags().StringVarP(&connectionString, "connection", "c", "", "Database connection string")
+	BackupCmd.Flags().StringVarP(&databaseName, "database", "d", "", "Database name")
 	BackupCmd.Flags().BoolVarP(&upload, "upload", "u", false, "Upload to aws")
 
-	if err := BackupCmd.MarkFlagRequired("db"); err != nil {
+	if err := BackupCmd.MarkFlagRequired("connection"); err != nil {
 		fmt.Println("Database connection string not defined")
+	}
+	if err := BackupCmd.MarkFlagRequired("database"); err != nil {
+		fmt.Println("Database name not defined")
 	}
 }

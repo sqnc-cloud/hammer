@@ -3,6 +3,7 @@ package root
 import (
 	"github.com/spf13/cobra"
 	"hammer/cmd/backup"
+	"hammer/cmd/restore"
 	"os"
 )
 
@@ -21,6 +22,7 @@ func Execute() {
 
 func addSubcommandPalettes() {
 	rootCmd.AddCommand(backup.BackupCmd)
+	rootCmd.AddCommand(restore.RestoreCmd)
 }
 
 func init() {

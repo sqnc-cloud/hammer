@@ -77,3 +77,44 @@ func ExportCollections(uri, databaseName string) (string, error) {
 
 	return outputFile, nil
 }
+
+func RestoreCollections(uri, databaseName, folderPath string) error {
+	client, err := ConnectMongoDB(uri)
+	if err != nil {
+		return err
+	}
+	defer DisconnectMongoDB(client)
+
+	db := client.Database(databaseName)
+
+	files, err := os.ReadDir(folderPath)
+	if err != nil {
+		return fmt.Errorf("failed to read directory: %w", err)
+	}
+
+	for _, file := range files {
+		if !file.IsDir() && filepath.Ext(file.Name()) == ".json" {
+			collectionName := file.Name()[:len(file.Name())-len(filepath.Ext(file.Name()))]
+			fmt.Printf("Importing collection: %s\n", collectionName)
+
+			filePath := filepath.Join(folderPath, file.Name())
+			fileData, err := os.ReadFile(filePath)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s: %w", filePath, err)
+			}
+
+			var docs []interface{}
+			if err := bson.UnmarshalExtJSON(fileData, true, &docs); err != nil {
+				return fmt.Errorf("failed to unmarshal json for file %s: %w", filePath, err)
+			}
+
+			collection := db.Collection(collectionName)
+			_, err = collection.InsertMany(context.TODO(), docs)
+			if err != nil {
+				return fmt.Errorf("failed to insert documents into collection %s: %w", collectionName, err)
+			}
+		}
+	}
+
+	return nil
+}

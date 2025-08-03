@@ -18,28 +18,24 @@ func ZipFolder(sourceFolder, destZipFile string) error {
 	archive := zip.NewWriter(zipFile)
 	defer archive.Close()
 
-	// Get the base directory name to use as the root within the zip file
-	// If sourceFolder is "/tmp/mydata", baseDir will be "mydata"
-	baseDir := filepath.Base(sourceFolder)
-
 	filepath.Walk(sourceFolder, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// Create a header for the file/directory
+		if path == sourceFolder {
+			return nil
+		}
+
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
 			return err
 		}
 
-		// Determine the name within the zip file
-		// This ensures that the zip file contains the base directory as its root
-		relPath, err := filepath.Rel(filepath.Dir(sourceFolder), path)
+		header.Name, err = filepath.Rel(sourceFolder, path)
 		if err != nil {
 			return err
 		}
-		header.Name = filepath.Join(baseDir, relPath)
 
 		if info.IsDir() {
 			header.Name += "/"
